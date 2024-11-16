@@ -9,15 +9,12 @@
     "@types/node-fetch": "^2.6.11",
     "@types/sha256": "^0.2.2",
     "@types/sync-fetch": "^0.4.3",
-    "bullmq": "^5.7.9",
-    "axios": "^1.2.1",
     "cors": "^2.8.5",
     "delphinus-curves": "git+https://github.com/DelphinusLab/delphinus-curves.git#yyu/hybridPackage",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.1",
-    "express": "^4.19.2",
-    "ioredis": "^5.4.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "zkwasm-service-helper": "github:DelphinusLab/zkWasm-service-helper"
   },
   "main": "src/index.js",
   "scripts": {
