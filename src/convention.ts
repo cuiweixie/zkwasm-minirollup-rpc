@@ -36,5 +36,3 @@ export function decodeWithdraw(txdata: Uint8Array) {
   }
   return r;
 }
-
-
