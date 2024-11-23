@@ -89,6 +89,25 @@ const contractABI = {
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "getBalance",
       "outputs": [
@@ -147,7 +166,7 @@ async function deposit(chainId: number, amount: number, prikey: L2AccountInfo, l
       const tokenAddr = process.env.REACT_APP_TOKEN_CONTRACT!;
       const tokenContract = await connector.getContractWithSigner(tokenAddr, JSON.stringify(contractABI.tokenABI));
       const tokenContractReader = connector.getContractWithoutSigner(tokenAddr, JSON.stringify(contractABI.tokenABI));
-      const balance = await tokenContractReader.getEthersContract().getBalance();
+      const balance = await tokenContractReader.getEthersContract().balanceOf(l1account.address);
       const allowance = await tokenContractReader.getEthersContract().allowance(l1account.address, proxyAddr);
       console.log("balance is:", balance);
       console.log("allowance is:", allowance);
