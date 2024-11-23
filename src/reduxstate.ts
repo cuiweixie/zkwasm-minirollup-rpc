@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { withBrowserConnector } from "web3subscriber/src/client.js";
+import { withBrowserConnector } from "web3subscriber/src/client";
 import { DelphinusBrowserConnector} from 'web3subscriber/src/provider';
 import { PrivateKey, bnToHexLe } from "delphinus-curves/src/altjubjub";
-import { signMessage } from "./address.js";
-import { LeHexBN } from './sign.js';
+import { signMessage } from "./address";
+import { LeHexBN } from './sign';
 
 export interface L1AccountInfo {
   address: string;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { sign, query } from "./sign.js";
+import { sign, query } from "./sign";
 
 function delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
