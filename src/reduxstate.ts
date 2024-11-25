@@ -269,6 +269,7 @@ export const accountSlice = createSlice({
       })
       .addCase(depositAsync.pending, (state) => {
         state.status = 'Loading';
+        console.log("deposit async is pending ....");
       })
       .addCase(depositAsync.fulfilled, (state, c) => {
         state.status = 'Ready';
