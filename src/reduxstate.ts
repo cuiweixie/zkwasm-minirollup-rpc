@@ -186,7 +186,7 @@ async function deposit(chainId: number, tokenIndex: number, amount: number, prik
         Number(tokenIndex),
         pkeyArray[1],
         pkeyArray[2],
-        amount,
+        amountWei,
       );
       // wait for tx to be mined, can add no. of confirmations as arg
       return tx
