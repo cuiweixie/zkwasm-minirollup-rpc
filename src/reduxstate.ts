@@ -4,6 +4,7 @@ import { DelphinusBrowserConnector} from 'web3subscriber/src/provider';
 import { PrivateKey, bnToHexLe } from "delphinus-curves/src/altjubjub";
 import { signMessage } from "./address";
 import { LeHexBN } from './sign';
+import BN from "bn.js";
 
 export interface L1AccountInfo {
   address: string;
@@ -153,7 +154,7 @@ const contractABI = {
   ],
 };
 
-async function deposit(chainId: number, amount: number, prikey: L2AccountInfo, l1account: L1AccountInfo) {
+async function deposit(chainId: number, tokenIndex: number, amount: number, prikey: L2AccountInfo, l1account: L1AccountInfo) {
   try {
     await withBrowserConnector(async (connector: DelphinusBrowserConnector) => {
       const chainidhex = "0x" + parseInt(process.env.REACT_APP_CHAIN_ID!).toString(16);
@@ -170,8 +171,11 @@ async function deposit(chainId: number, amount: number, prikey: L2AccountInfo, l
       const allowance = await tokenContractReader.getEthersContract().allowance(l1account.address, proxyAddr);
       console.log("balance is:", balance);
       console.log("allowance is:", allowance);
-      if (allowance < Number(amount)) {
-        if (balance >= Number(amount)) {
+      let a = new BN(amount);
+      let b = new BN("10").pow(new BN(18));
+      const amountWei = a.mul(b);
+      if (allowance < amountWei) {
+        if (balance >= amountWei) {
           await tokenContract.getEthersContract().approve(proxyAddr, balance);
         } else {
           throw Error("Not enough balance for approve");
@@ -179,7 +183,7 @@ async function deposit(chainId: number, amount: number, prikey: L2AccountInfo, l
       }
       const proxyContract = await connector.getContractWithSigner(proxyAddr, JSON.stringify(contractABI.proxyABI));
       const tx = await proxyContract.getEthersContract().topup.send(
-        0,
+        Number(tokenIndex),
         pkeyArray[1],
         pkeyArray[2],
         amount,
@@ -231,8 +235,8 @@ export const loginL2AccountAsync = createAsyncThunk(
 
 export const depositAsync = createAsyncThunk(
   'acccount/deposit',
-  async (params: {amount: number, l2account: L2AccountInfo, l1account: L1AccountInfo} ,  thunkApi) => {
-    return await deposit(parseInt(process.env.REACT_APP_CHAIN_ID!), params.amount, params.l2account, params.l1account);
+  async (params: {tokenIndex: number, amount: number, l2account: L2AccountInfo, l1account: L1AccountInfo} ,  thunkApi) => {
+    return await deposit(parseInt(process.env.REACT_APP_CHAIN_ID!), params.tokenIndex, params.amount, params.l2account, params.l1account);
   }
 );
 
