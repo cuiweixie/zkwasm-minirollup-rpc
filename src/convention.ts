@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import { ethers } from "ethers";
-import { ZKWasmAppRpc } from "./rpc";
+import { ZKWasmAppRpc } from "./rpc.js";
 
 function bytesToHex(bytes: Array<number>): string  {
   return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
