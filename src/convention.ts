@@ -81,11 +81,11 @@ export class PlayerConvention {
   async deposit(pid_1:bigint, pid_2:bigint, amount:bigint) {
     let nonce = await this.getNonce();
     try {
-      let finished = await this.rpc.sendTransaction(
+      const state = await this.rpc.sendTransaction(
         new BigUint64Array([this.createCommand(nonce, this.commandDeposit, 0n), pid_1, pid_2, amount]),
         this.processingKey
       );
-      console.log("deposit processed at:", finished, pid_1, pid_2);
+      return state;
     } catch(e) {
       if(e instanceof Error) {
         console.log(e.message);
@@ -119,14 +119,14 @@ export class PlayerConvention {
     console.log("third is", thirdLimb);
 
     try {
-      let processStamp = await this.rpc.sendTransaction(
+      const state = await this.rpc.sendTransaction(
         new BigUint64Array([
           this.createCommand(nonce, this.commandWithdraw, 0n),
           (firstLimb << 32n) + amount,
           sndLimb,
           thirdLimb
         ]), this.processingKey);
-      console.log("withdraw rewards processed at:", processStamp);
+      return state;
     } catch(e) {
       if (e instanceof Error) {
         console.log(e.message);
