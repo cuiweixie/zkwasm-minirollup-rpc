@@ -1,5 +1,5 @@
-import { withBrowserConnector } from "web3subscriber/src/client";
-import { DelphinusBrowserConnector } from "web3subscriber/src/provider";
+import { withBrowserConnector } from "./client.js";
+import { DelphinusBrowserConnector } from "./provider.js";
 
 
 export function addressAbbreviation(address: string, tailLength: number) {
