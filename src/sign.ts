@@ -73,10 +73,11 @@ export class LeHexBN {
   }
 
   // little endian
-  toU64Array(): BigUint64Array {
-    let values:BigUint64Array = new BigUint64Array(4);
+  toU64Array(s: number = 4): BigUint64Array {
+    let len = s;
+    let values:BigUint64Array = new BigUint64Array(len);
     let num = BigInt("0x" + this.toBN().toString(16));
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < len; i++) {
         values[i] = num % (1n<<64n);
         num = num >> 64n;
     }
@@ -85,7 +86,7 @@ export class LeHexBN {
 }
 
 // This is subtl as the Point library is using BN while we prefer use BigInt
-export function verify_sign(msg: LeHexBN, pkx: LeHexBN, pky: LeHexBN, rx:LeHexBN, ry:LeHexBN, s:LeHexBN): boolean {
+export function verifySign(msg: LeHexBN, pkx: LeHexBN, pky: LeHexBN, rx:LeHexBN, ry:LeHexBN, s:LeHexBN): boolean {
   let l = Point.base.mul(s.toBN());
   let pkey = new Point(pkx.toBN(), pky.toBN());
   let r = (new Point(rx.toBN(), ry.toBN())).add(pkey.mul(msg.toBN()))
@@ -98,9 +99,13 @@ export function sign(cmd: BigUint64Array, prikey: string) {
   let pkey = PrivateKey.fromString(prikey);
   let r = pkey.r();
   let R = Point.base.mul(r);
-  console.log(cmd);
-  let H = cmd[0] + (cmd[1] << 64n) + (cmd[2] << 128n) + (cmd[3] << 192n);
-  let hbn = new BN(H.toString(10));
+  let H;
+  if (cmd.length == 4) {
+    let H = cmd[0] + (cmd[1] << 64n) + (cmd[2] << 128n) + (cmd[3] << 192n);
+  } else {
+    throw Error("Unsupported command length");
+  }
+  let hbn = new BN(H!.toString(10));
   let S = r.add(pkey.key.mul(new CurveField(hbn)));
   let pubkey = pkey.publicKey;
   const data = {
