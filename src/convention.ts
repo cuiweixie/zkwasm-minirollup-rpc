@@ -50,8 +50,12 @@ export class PlayerConvention {
     this.commandWithdraw = commandWithdraw;
   }
 
-  createCommand(nonce: bigint, command: bigint, objindex: bigint) {
-      return (nonce << 16n) + (objindex << 8n) + command;
+  createCommand(nonce: bigint, command: bigint, params: Array<bigint>) {
+    const cmd = (nonce << 16n) + (BigInt(params.length + 1) << 8n) + command;
+    let buf = [cmd];
+    buf.concat(params);
+    const barray = new BigUint64Array(buf);
+    return barray;
   }
 
   async getConfig(): Promise<any> {
@@ -82,7 +86,7 @@ export class PlayerConvention {
     let nonce = await this.getNonce();
     try {
       const state = await this.rpc.sendTransaction(
-        new BigUint64Array([this.createCommand(nonce, this.commandDeposit, 0n), pid_1, pid_2, amount]),
+        this.createCommand(nonce, this.commandDeposit, [pid_1, pid_2, amount]),
         this.processingKey
       );
       return state;
@@ -120,12 +124,13 @@ export class PlayerConvention {
 
     try {
       const state = await this.rpc.sendTransaction(
-        new BigUint64Array([
-          this.createCommand(nonce, this.commandWithdraw, 0n),
-          (firstLimb << 32n) + amount,
-          sndLimb,
-          thirdLimb
-        ]), this.processingKey);
+        this.createCommand(
+          nonce,
+          this.commandWithdraw,
+          [(firstLimb << 32n) + amount, sndLimb, thirdLimb]
+        ),
+        this.processingKey
+      );
       return state;
     } catch(e) {
       if (e instanceof Error) {
