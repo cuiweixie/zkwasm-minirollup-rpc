@@ -1,5 +1,7 @@
 import { BN } from "bn.js";
 import { CurveField, Point, PrivateKey, bnToHexLe } from "delphinus-curves/src/altjubjub";
+import { poseidon } from "delphinus-curves/src/poseidon"
+import { Field } from 'delphinus-curves/src/field';
 
 function bigEndianHexToBN(hexString: string) {
   // Remove the '0x' prefix if it exists
@@ -100,10 +102,22 @@ export function sign(cmd: BigUint64Array, prikey: string) {
   let r = pkey.r();
   let R = Point.base.mul(r);
   let H;
+  let fvalues = [];
   if (cmd.length == 4) {
-    let H = cmd[0] + (cmd[1] << 64n) + (cmd[2] << 128n) + (cmd[3] << 192n);
+    H = cmd[0] + (cmd[1] << 64n) + (cmd[2] << 128n) + (cmd[3] << 192n);
   } else {
-    throw Error("Unsupported command length");
+    for (let i=0; i<cmd.length;) {
+      let v = 0n;
+      let j = 0;
+      for (;j<3;j++) {
+        if (i+j<cmd.length) {
+          v = v + cmd[i+j] << (64n * BigInt(j));
+        }
+      }
+      i = i + j;
+      fvalues.push(new Field(new BN(v.toString(10), 10)));
+    }
+    H = poseidon(fvalues).v;
   }
   let hbn = new BN(H!.toString(10));
   let S = r.add(pkey.key.mul(new CurveField(hbn)));
