@@ -1,5 +1,5 @@
 import { BN } from "bn.js";
-import { CurveField, Point, PrivateKey, bnToHexLe } from "delphinus-curves/src/altjubjub";
+import { bnToHexLe, CurveField, Point, PrivateKey } from "delphinus-curves/src/altjubjub";
 import { poseidon } from "delphinus-curves/src/poseidon"
 import { Field } from 'delphinus-curves/src/field';
 
@@ -38,6 +38,7 @@ function littleEndianHexToBN(hexString: string) {
   // Create a BN instance from the big-endian hex string
   return new BN(reversedHex, 16);
 }
+
 /*
 export class beHexBN {
   hexstr: string;
@@ -103,23 +104,25 @@ export function sign(cmd: BigUint64Array, prikey: string) {
   let R = Point.base.mul(r);
   let H;
   let fvalues = [];
+  let h = 0n;
   for (let i=0; i<cmd.length;) {
     let v = 0n;
     let j = 0;
     for (;j<3;j++) {
       if (i+j<cmd.length) {
         v = v + cmd[i+j] << (64n * BigInt(j));
+        h = h + cmd[i+j] << (64n * BigInt(j + i))
       }
     }
     i = i + j;
     fvalues.push(new Field(new BN(v.toString(10), 10)));
   }
   H = poseidon(fvalues).v;
-  let hbn = new BN(H!.toString(10));
+  let hbn = new BN(h.toString(10));
   let S = r.add(pkey.key.mul(new CurveField(hbn)));
   let pubkey = pkey.publicKey;
   const data = {
-    msg: bnToHexLe(hbn),
+    msg: bnToHexLe(hbn, cmd.length * 8),
     pkx: bnToHexLe(pubkey.key.x.v),
     pky: bnToHexLe(pubkey.key.y.v),
     sigx: bnToHexLe(R.x.v),
@@ -134,7 +137,7 @@ export function query(prikey: string) {
   let pkey = PrivateKey.fromString(prikey);
   let pubkey = pkey.publicKey;
   const data = {
-    pkx: bnToHexLe(pubkey.key.x.v),
+    pkx: bnToHexLe(pubkey.key.x.v, 32),
   };
   console.log(data);
   return data;
