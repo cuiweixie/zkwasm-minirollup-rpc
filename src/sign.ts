@@ -118,11 +118,14 @@ export function sign(cmd: BigUint64Array, prikey: string) {
     fvalues.push(new Field(new BN(v.toString(10), 10)));
   }
   H = poseidon(fvalues).v;
-  let hbn = new BN(h.toString(10));
+  let hbn = new BN(H.toString(10));
+  let msgbn = new BN(h.toString(10));
   let S = r.add(pkey.key.mul(new CurveField(hbn)));
   let pubkey = pkey.publicKey;
   const data = {
-    msg: bnToHexLe(hbn, cmd.length * 8),
+    msg: bnToHexLe(msgbn, cmd.length * 8),
+    raw: cmd,
+    hash: bnToHexLe(hbn),
     pkx: bnToHexLe(pubkey.key.x.v),
     pky: bnToHexLe(pubkey.key.y.v),
     sigx: bnToHexLe(R.x.v),
