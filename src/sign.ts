@@ -110,8 +110,8 @@ export function sign(cmd: BigUint64Array, prikey: string) {
     let j = 0;
     for (;j<3;j++) {
       if (i+j<cmd.length) {
-        v = v + cmd[i+j] << (64n * BigInt(j));
-        h = h + cmd[i+j] << (64n * BigInt(j + i))
+        v = v + (cmd[i+j] << (64n * BigInt(j)));
+        h = h + (cmd[i+j] << (64n * BigInt(j + i)));
       }
     }
     i = i + j;
