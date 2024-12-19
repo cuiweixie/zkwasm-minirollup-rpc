@@ -103,22 +103,18 @@ export function sign(cmd: BigUint64Array, prikey: string) {
   let R = Point.base.mul(r);
   let H;
   let fvalues = [];
-  if (cmd.length == 4) {
-    H = cmd[0] + (cmd[1] << 64n) + (cmd[2] << 128n) + (cmd[3] << 192n);
-  } else {
-    for (let i=0; i<cmd.length;) {
-      let v = 0n;
-      let j = 0;
-      for (;j<3;j++) {
-        if (i+j<cmd.length) {
-          v = v + cmd[i+j] << (64n * BigInt(j));
-        }
+  for (let i=0; i<cmd.length;) {
+    let v = 0n;
+    let j = 0;
+    for (;j<3;j++) {
+      if (i+j<cmd.length) {
+        v = v + cmd[i+j] << (64n * BigInt(j));
       }
-      i = i + j;
-      fvalues.push(new Field(new BN(v.toString(10), 10)));
     }
-    H = poseidon(fvalues).v;
+    i = i + j;
+    fvalues.push(new Field(new BN(v.toString(10), 10)));
   }
+  H = poseidon(fvalues).v;
   let hbn = new BN(H!.toString(10));
   let S = r.add(pkey.key.mul(new CurveField(hbn)));
   let pubkey = pkey.publicKey;
