@@ -53,7 +53,7 @@ export class PlayerConvention {
   createCommand(nonce: bigint, command: bigint, params: Array<bigint>) {
     const cmd = (nonce << 16n) + (BigInt(params.length + 1) << 8n) + command;
     let buf = [cmd];
-    buf.concat(params);
+    buf = buf.concat(params);
     const barray = new BigUint64Array(buf);
     return barray;
   }
