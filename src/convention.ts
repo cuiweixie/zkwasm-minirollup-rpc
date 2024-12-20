@@ -7,7 +7,8 @@ function bytesToHex(bytes: Array<number>): string  {
 }
 
 function bytesToDecimal(bytes: Array<number>): string  {
-  return Array.from(bytes, byte => byte.toString().padStart(2, '0')).join('');
+  const bigInt = BigInt("0x" + bytesToHex(bytes)); // Convert bytes to hex string and then to BigInt
+  return bigInt.toString(); // Convert the BigInt to a decimal string
 }
 
 export function composeWithdrawParams(addressBN: BN, amount: bigint) {
@@ -37,6 +38,25 @@ export function decodeWithdraw(txdata: Uint8Array) {
   }
   return r;
 }
+
+export class TransactionData {
+  nonce: bigint;
+  command: bigint;
+  params: Array<bigint>;
+  constructor(nonce: bigint, command: bigint, params: Array<bigint>) {
+    this.nonce = nonce;
+    this.command = command;
+    this.params = params;
+  }
+  encodeCommand() {
+    const cmd = (this.nonce << 16n) + (BigInt(this.params.length + 1) << 8n) + this.command;
+    let buf = [this.command];
+    buf = buf.concat(this.params);
+    const barray = new BigUint64Array(buf);
+    return barray;
+  }
+}
+
 
 export class PlayerConvention {
   processingKey: string;
@@ -82,11 +102,11 @@ export class PlayerConvention {
     return nonce;
   }
 
-  async deposit(pid_1:bigint, pid_2:bigint, amount:bigint) {
+  async deposit(pid_1:bigint, pid_2:bigint, tokenIndex:bigint, amount:bigint) {
     let nonce = await this.getNonce();
     try {
       const state = await this.rpc.sendTransaction(
-        this.createCommand(nonce, this.commandDeposit, [pid_1, pid_2, amount]),
+        this.createCommand(nonce, this.commandDeposit, [pid_1, pid_2, tokenIndex, amount]),
         this.processingKey
       );
       return state;
@@ -98,7 +118,7 @@ export class PlayerConvention {
     }
   }
 
-  async withdrawRewards(address: string, amount: bigint) {
+  async withdrawRewards(address: string, tokenIndex: bigint, amount: bigint) {
     let nonce = await this.getNonce();
     let addressBN = new BN(address, 16);
     let a = addressBN.toArray("be", 20); // 20 bytes = 160 bits and split into 4, 8, 8
@@ -127,7 +147,7 @@ export class PlayerConvention {
         this.createCommand(
           nonce,
           this.commandWithdraw,
-          [(firstLimb << 32n) + amount, sndLimb, thirdLimb]
+          [tokenIndex, (firstLimb << 32n) + amount, sndLimb, thirdLimb]
         ),
         this.processingKey
       );
