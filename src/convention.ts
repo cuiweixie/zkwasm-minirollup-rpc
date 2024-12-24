@@ -50,7 +50,7 @@ export class TransactionData {
   }
   encodeCommand() {
     const cmd = (this.nonce << 16n) + (BigInt(this.params.length + 1) << 8n) + this.command;
-    let buf = [this.command];
+    let buf = [cmd];
     buf = buf.concat(this.params);
     const barray = new BigUint64Array(buf);
     return barray;
