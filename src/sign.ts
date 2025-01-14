@@ -124,7 +124,6 @@ export function sign(cmd: BigUint64Array, prikey: string) {
   let pubkey = pkey.publicKey;
   const data = {
     msg: bnToHexLe(msgbn, cmd.length * 8),
-    raw: cmd,
     hash: bnToHexLe(hbn),
     pkx: bnToHexLe(pubkey.key.x.v),
     pky: bnToHexLe(pubkey.key.y.v),
